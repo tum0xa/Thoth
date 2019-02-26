@@ -13,6 +13,14 @@ def login(request):
     title = 'Sign in'
     login_form = LoginForm(data=request.POST)
     error_message = ''
+    info_message = ''
+
+    try:
+        info_message = request.session['info_message']
+        error_message = request.session['error_message']
+    except Exception:
+        print("wrong with session")
+
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -25,9 +33,20 @@ def login(request):
         else:
             error_message = "User does not exist (might be is not active) or password is wrong!"
     else:
-        print("ooo")
-    print(error_message)
-    content = {'title': title, 'login_form': login_form, 'error_message': error_message}
+        try:
+            if request.session['send_is_ok']:
+                info_message = "Activation key has been sent to your email. Please check and activate the account!"
+            else:
+                request.session['send_is_not_ok']
+                error_message = "Error during sending email with activation code!"
+        except Exception:
+            pass
+
+    print(info_message)
+    content = {'title': title,
+               'login_form': login_form,
+               'error_message': error_message,
+               'info_message': info_message}
 
     return render(request, 'authapp/login.html', content)
 
@@ -39,7 +58,7 @@ def logout(request):
 
 def register(request):
     title = 'Register'
-
+    error_message = ''
     if request.method == 'POST':
         register_form = RegisterForm(request.POST, request.FILES)
 
@@ -47,8 +66,15 @@ def register(request):
             user = register_form.save()
             if send_verify_mail(user):
                 print('Сообщение подтверждения отправлено')
+                request.session['send_is_ok'] = True
             else:
                 print('Ошибка отправки сообщения')
+                request.session['send_is_not_ok'] = True
+                del request.session['send_is_ok']
+        else:
+            error_message = "Passwords are not identical"
+            content = {'title': title, 'register_form': register_form, 'error_message': error_message}
+            return render(request, 'authapp/register.html', content)
         return HttpResponseRedirect(reverse('authapp:login'))
     else:
         register_form = RegisterForm()
@@ -87,12 +113,24 @@ def verify(request, email, activation_key):
             user.is_active = True
             user.save()
             auth.login(request, user)
+            request.session['info_message'] = 'Activation has done successfully. Please sign in!'
+            request.session['error_message'] = f''
         else:
-            print(f'error activation user: {user}')
-        return render(request, 'authapp/verification.html')
+            request.session['info_message'] = ''
+            request.session['error_message'] = f'Error activation user: {user.username}'
+            print(f'error activation user: {user.username}')
+
+        try:
+            del request.session['send_is_ok']
+        except Exception:
+            pass
+        return HttpResponseRedirect(reverse('authapp:login'))
+
     except Exception as e:
         print(f'error activation user : {e.args}')
-        return HttpResponseRedirect(reverse('main:main'))
+        request.session['error_message'] = f'Error during activation user!'
+        # return render(request, 'authapp/register.html')
+        return HttpResponseRedirect(reverse('authapp:login'))
 
 
 def reset(request):
