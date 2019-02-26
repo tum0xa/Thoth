@@ -1,0 +1,13 @@
+<div class="form-group">
+    <label for="username">Username</label>
+    <input type="{{ widget.type }}"
+           class="form-control underlined"
+           name="{{ widget.name }}"
+           id="username"
+           placeholder="Your email address"
+           required
+            {% if widget.value != None %}
+                value="{{ widget.value|stringformat:'s' }}"
+            {% endif %}
+            {% include "django/forms/widgets/attrs.html" %}>
+</div>
