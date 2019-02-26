@@ -6,8 +6,8 @@ from datetime import timedelta
 
 class SystemUser(AbstractUser):
     email = models.EmailField(unique=True)
-    birthday = models.DateField(verbose_name="Birthday date", blank=True)
-    avatar = models.ImageField(verbose_name="Avatar", upload_to='Avatars', blank=True)
+    # birthday = models.DateField(verbose_name="Birthday date", blank=True)
+    # avatar = models.ImageField(verbose_name="Avatar", upload_to='Avatars', blank=True)
 
     is_ceo = models.BooleanField(default=False)
     is_engineer = models.BooleanField(default=False)

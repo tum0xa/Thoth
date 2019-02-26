@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UserChangeForm
-from django.forms.widgets import TextInput
+from django.forms.widgets import TextInput, PasswordInput
 from authapp.models import SystemUser
 import random
 import hashlib
@@ -10,32 +10,54 @@ class ModularTextInput(TextInput):
     template_name = 'authapp/widgets/modular_text_input.html'
 
 
+class ModularPasswordInput(PasswordInput):
+    template_name = 'authapp/widgets/modular_text_input.html'
+
+
 class LoginForm(AuthenticationForm):
     class Meta:
         model = SystemUser
         fields = ('username', 'password')
 
     username = forms.CharField(widget=ModularTextInput)
+    password = forms.CharField(widget=ModularPasswordInput)
 
-    # def __init__(self, *args, **kwargs):
-    #     super(LoginForm, self).__init__(*args, **kwargs)
-        # for field_name, field in self.fields.items():
-        #     if field_name == 'username':
-        #         field.widget.attrs['class'] = 'form-control underlined'
-        #         field.widget.attrs['placeholder'] = ''
-
+    def __init__(self, *args, **kwargs):
+        super(LoginForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['required'] = True
+            if field_name == 'username':
+                field.widget.attrs['placeholder'] = 'Your name or e-mail'
+            if field_name == 'password':
+                field.widget.type = 'password'
+                field.widget.attrs['placeholder'] = 'Your password'
 
 
 class RegisterForm(UserCreationForm):
     class Meta:
         model = SystemUser
-        fields = ('username', 'first_name', 'password1', 'password2', 'email', 'avatar')
+        fields = ('username',  'email')
+
+    # password1 = forms.CharField(widget=ModularTextInput)
+    # password2 = forms.CharField(widget=ModularTextInput)
 
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'col-md-12 col-12'
-            field.help_text = ''
+            field.widget.attrs['required'] = True
+            field.widget.attrs['class'] = "form-control underlined"
+            if field_name == 'username':
+                field.widget.attrs['placeholder'] = 'Your name'
+
+            if field_name == 'email':
+                field.widget.attrs['placeholder'] = 'Your email address'
+
+            if field_name == 'password1':
+                field.widget.attrs['placeholder'] = 'Enter password'
+
+            if field_name == 'password2':
+                field.widget.attrs['placeholder'] = 'Re-type password'
+
 
     # def clean_age(self):
     #     data = self.cleaned_data['age']

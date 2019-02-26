@@ -1,11 +1,10 @@
 <div class="form-group">
-    <label for="username">Username</label>
+    <label for="{{ widget.name }}">{{ widget.name|capfirst }}</label>
     <input type="{{ widget.type }}"
            class="form-control underlined"
            name="{{ widget.name }}"
-           id="username"
-           placeholder="Your email address"
-           required
+           id="{{ widget.name }}"
+
             {% if widget.value != None %}
                 value="{{ widget.value|stringformat:'s' }}"
             {% endif %}

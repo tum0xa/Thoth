@@ -21,13 +21,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-with open('config.json', 'r') as f:
+with open(os.path.join(BASE_DIR, 'Thoth/config.json'), 'r') as f:
     config = json.load(f)
 
 SECRET_KEY = config['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(config['DEBUG'])
 
 ALLOWED_HOSTS = []
 
@@ -136,10 +136,7 @@ LOGIN_URL = '/auth/login/'
 
 DOMAIN_NAME = 'http://localhost:8000'
 
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = '25'
-EMAIL_HOST_USER = 'anubis@pta-group.ru'
-EMAIL_HOST_PASSWORD = 'anubis'
-EMAIL_USE_SSL = False
 
-EMAIL_HOST_USER, EMAIL_HOST_PASSWORD = None, None
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'tmp/email-messages/')
+

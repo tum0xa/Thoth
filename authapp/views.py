@@ -12,25 +12,29 @@ from django.urls import reverse
 def login(request):
     title = 'Sign in'
     login_form = LoginForm(data=request.POST)
-
-
-    if request.method == 'POST' and login_form.is_valid():
+    error_message = ''
+    if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
 
         user = auth.authenticate(username=username, password=password)
+
         if user and user.is_active:
-
             auth.login(request, user)
-            return HttpResponseRedirect(reverse('main'))
+            return HttpResponseRedirect(reverse('main:main'))
+        else:
+            error_message = "User does not exist (might be is not active) or password is wrong!"
+    else:
+        print("ooo")
+    print(error_message)
+    content = {'title': title, 'login_form': login_form, 'error_message': error_message}
 
-    content = {'title': title, 'login_form': login_form}
     return render(request, 'authapp/login.html', content)
 
 
 def logout(request):
     auth.logout(request)
-    return HttpResponseRedirect(reverse('main'))
+    return HttpResponseRedirect(reverse('main:main'))
 
 
 def register(request):
@@ -88,7 +92,7 @@ def verify(request, email, activation_key):
         return render(request, 'authapp/verification.html')
     except Exception as e:
         print(f'error activation user : {e.args}')
-        return HttpResponseRedirect(reverse('main'))
+        return HttpResponseRedirect(reverse('main:main'))
 
 
 def reset(request):
