@@ -19,7 +19,7 @@ def login(request):
         info_message = request.session['info_message']
         error_message = request.session['error_message']
     except Exception:
-        print("wrong with session")
+        print("Wrong session")
 
     if request.method == 'POST':
         username = request.POST['username']
